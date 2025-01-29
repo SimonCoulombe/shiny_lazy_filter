@@ -73,7 +73,6 @@ main <- function() {
 
   tryCatch({
     # Initialize pool
-    initialize_pool()
     pool <- get_pool()
 
     # Initialize schema

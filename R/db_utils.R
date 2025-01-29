@@ -6,21 +6,16 @@ library(logger)
 
 pool <- NULL
 
-initialize_pool <- function() {
+
+get_pool <- function() {
   log_info("Initializing connection pool")
-  pool <<- dbPool(
+  pool <- dbPool(
     RSQLite::SQLite(),
     dbname = "cache.db",
     maxSize = 10,
     idleTimeout = 3600
   )
-}
-
-get_pool <- function() {
-  if (is.null(pool)) {
-    initialize_pool()
-  }
-  pool
+  return(pool)
 }
 
 build_query <- function(filters) {

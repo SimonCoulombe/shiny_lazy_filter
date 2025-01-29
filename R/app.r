@@ -53,7 +53,7 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
 #  log_info("Initializing app...")
-  initialize_pool()
+  pool <- get_pool()
   # Initialize connection pool on startup
   #onStart(function() {
   #})
