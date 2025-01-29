@@ -52,17 +52,7 @@ ui <- fluidPage(
 # Server
 server <- function(input, output, session) {
 
-#  log_info("Initializing app...")
   pool <- get_pool()
-  # Initialize connection pool on startup
-  #onStart(function() {
-  #})
-
-  # Clean up on app exit
-  onStop(function() {
- #   log_info("Shutting down app...")
-    if (!is.null(pool)) poolClose(pool)
-  })
 
   # Dynamic filters management
   filter_count <- reactiveVal(0)

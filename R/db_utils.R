@@ -4,9 +4,6 @@ library(pool)
 library(RSQLite)
 library(logger)
 
-pool <- NULL
-
-
 get_pool <- function() {
   log_info("Initializing connection pool")
   pool <- dbPool(
