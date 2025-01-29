@@ -1,5 +1,4 @@
 
-
 # ===== myapp/R/modules/plot_module.R =====
 library(shiny)
 library(ggplot2)
@@ -23,7 +22,6 @@ plotModuleUI <- function(id) {
     )
   )
 }
-
 plotModule <- function(input, output, session, filters) {
   ns <- session$ns
 
@@ -55,16 +53,45 @@ plotModule <- function(input, output, session, filters) {
   observeEvent(input$refresh, {
     message("Refresh button clicked")
     is_loading(TRUE)
+
+    # Build the query based on the filters
     query <- build_query(filters())
-    message("query:", query)
+    message("Query:", query)
+
+    # Update the query state
+    query_state(query)
+
+    # Simulate data fetching (replace with actual data fetching logic)
+    data <- tryCatch({
+      message("Fetching data with query:", query)
+      # Replace this with your actual data fetching logic
+      # Example: dbGetQuery(pool, query)
+      data.frame(
+        date = seq.Date(Sys.Date() - 29, Sys.Date(), by = "day"),
+        value = rnorm(30, mean = 50, sd = 10)
+      )
+    }, error = function(e) {
+      showNotification(
+        "Error fetching data. Please try again.",
+        type = "error"
+      )
+      return(NULL)
+    })
+
+    if (is.null(data)) {
+      is_loading(FALSE)
+      return()
+    }
+
+    # Update the current data
+    current_data(data)
     is_loading(FALSE)
-    #query_state(query)
   })
 
   # Data download handler
   output$download_data <- downloadHandler(
     filename = function() {
-      paste("timeseries-data-", Sys.Date(), ".csv", sep="")
+      paste("timeseries-data-", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
       req(current_data())
@@ -74,61 +101,26 @@ plotModule <- function(input, output, session, filters) {
 
   # Plot with progress indicator
   output$timeseries_plot <- renderPlot({
-    #req(query_state())
+    req(current_data())  # Ensure data is available
 
-    # Check cache staleness
-    # if (is_cache_stale()) {
-    #   showNotification(
-    #     "Data cache is stale. Results may not reflect latest data.",
-    #     type = "warning",
-    #     duration = 10
-    #   )
-    # }
+    # Create plot
+    p <- ggplot(current_data(), aes(x = date, y = value)) +
+      geom_line(color = "#2c3e50", size = 1) +
+      geom_point(color = "#2c3e50", size = 2, alpha = 0.5) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+        panel.grid.major = element_line(color = "#ecf0f1"),
+        panel.grid.minor = element_line(color = "#f7f9f9")
+      ) +
+      labs(
+        title = "Time Series Data",
+        x = "Date",
+        y = "Value"
+      )
 
-    withProgress(
-      message = 'Fetching data...',
-      detail = 'This may take a few seconds...',
-      value = 0,
-      {
-        # Get data
-        data <- tryCatch({
-          message("getting data with query", query)
-          #get_data_with_progress(query_state(), session)
-          dbGetQuery(pool, query)
-        }, error = function(e) {
-          #log_error("Error fetching data: {str(e)}")
-          showNotification(
-            "Error fetching data. Please try again.",
-            type = "error"
-          )
-          return(NULL)
-        })
-
-        if (is.null(data)) return(NULL)
-
-        current_data(data)
-        is_loading(FALSE)
-
-        # Create plot
-        p <- ggplot(data, aes(x = date, y = value)) +
-          geom_line(color = "#2c3e50", size = 1) +
-          geom_point(color = "#2c3e50", size = 2, alpha = 0.5) +
-          theme_minimal() +
-          theme(
-            plot.title = element_text(size = 16, face = "bold"),
-            axis.title = element_text(size = 12),
-            axis.text = element_text(size = 10),
-            panel.grid.major = element_line(color = "#ecf0f1"),
-            panel.grid.minor = element_line(color = "#f7f9f9")
-          ) +
-          labs(
-            title = "Time Series Data",
-            x = "Date",
-            y = "Value"
-          )
-
-        return(p)
-      }
-    )
+    return(p)
   })
 }
