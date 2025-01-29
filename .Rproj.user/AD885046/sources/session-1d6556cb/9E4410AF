@@ -1,0 +1,26 @@
+{
+    "id": "9E4410AF",
+    "path": "~/myapp/R/shiny-app-modules.r",
+    "project_path": "R/shiny-app-modules.r",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1738177288900.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "152,0",
+        "scrollLine": "122"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1738179908,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1738179908729,
+    "read_only": false,
+    "read_only_alternatives": []
+}

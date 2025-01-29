@@ -1,0 +1,8 @@
+build-last-errors="[]"
+build-last-errors-base-dir=""
+build-last-outputs="[]"
+compile_pdf_state="{\"tab_visible\":false,\"running\":false,\"target_file\":\"\",\"output\":\"\",\"errors\":[]}"
+files.monitored-path=""
+find-in-files-state="{\"handle\":\"tg4pu9y1xiwj257h\",\"input\":\"sync.log\",\"path\":\"~/myapp\",\"regex\":false,\"ignoreCase\":true,\"results\":{\"file\":[\"~/myapp/R/sync-script.r\"],\"line\":[70],\"lineValue\":[\"#log_appender(appender_file(\\\"../logs/sync.log\\\"))\"],\"matchOn\":[[37]],\"matchOff\":[[45]],\"replaceMatchOn\":[[]],\"replaceMatchOff\":[[]]},\"running\":false,\"replace\":false,\"preview\":false,\"gitFlag\":false,\"replacePattern\":\"\"}"
+imageDirtyState="1"
+saveActionState="0"
