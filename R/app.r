@@ -60,16 +60,17 @@ server <- function(input, output, session) {
   observeEvent(input$add_filter, {
     log_info("Adding new filter")
     current_count <- filter_count()
-    filter_count(current_count + 1)
-
+    new_count <- current_count + 1
+    filter_count(new_count)
     filters_list <- filters()
-    filters_list[[length(filters_list) + 1]] <- filterModule(paste0("filter_", current_count))
+    filters_list[[new_count]] <- filterModule(paste0("filter_", new_count))
+    message(str(filters_list))
     filters(filters_list)
   })
 
   output$filters <- renderUI({
     lapply(seq_len(filter_count()), function(i) {
-      filterModuleUI(paste0("filter_", i-1))
+      filterModuleUI(paste0("filter_", i))
     })
   })
 
