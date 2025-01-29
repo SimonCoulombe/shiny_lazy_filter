@@ -15,7 +15,7 @@ CACHE_CONFIG <- list(
 #' Initialize the cache database schema
 #' @param pool Database connection pool
 initialize_cache_schema <- function(pool) {
-  message("Initializing cache schema")
+  log_info("Initializing cache schema")
 
   tryCatch({
     # Create timeseries table
@@ -41,7 +41,7 @@ initialize_cache_schema <- function(pool) {
       )
     ")
 
-    message("Cache schema initialized successfully")
+    log_info("Cache schema initialized successfully")
   }, error = function(e) {
     log_error("Error initializing cache schema: {str(e)}")
     stop(e)
@@ -107,7 +107,7 @@ update_column_metadata <- function(column_name, metadata) {
       metadata$max_value
     ))
 
-    message("Updated cache for column: {column_name}")
+    log_info("Updated cache for column: {column_name}")
   }, error = function(e) {
     log_error("Error updating cache for column {column_name}: {str(e)}")
     stop(e)
@@ -267,7 +267,7 @@ create_sample_data <- function(n = 1000) {
 #' Initialize the database with sample data
 #' @param pool Database connection pool
 initialize_sample_database <- function(pool) {
-  message("Initializing sample database")
+  log_info("Initializing sample database")
 
   tryCatch({
     # Drop existing tables if they exist
@@ -306,7 +306,7 @@ initialize_sample_database <- function(pool) {
     ")
 
     # Generate and insert sample data
-    message("Generating sample data")
+    log_info("Generating sample data")
     sample_data <- create_sample_data(1000)
 
     # Insert data in chunks to avoid memory issues
@@ -322,7 +322,7 @@ initialize_sample_database <- function(pool) {
                    append = TRUE, row.names = FALSE)
     }
 
-    message("Sample database initialized successfully")
+    log_info("Sample database initialized successfully")
   }, error = function(e) {
     log_error("Error initializing sample database: {str(e)}")
     stop(e)

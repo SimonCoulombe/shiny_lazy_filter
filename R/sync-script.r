@@ -33,7 +33,7 @@ generate_sample_data <- function(n = 1000) {
 #' @param column_name Name of the column
 #' @param column_type Type of the column (numeric or categorical)
 sync_column_metadata <- function(pool, column_name, column_type) {
-#  message("Syncing metadata for column: {column_name}")
+#  log_info("Syncing metadata for column: {column_name}")
 
   metadata <- list(column_type = column_type)
 
@@ -69,7 +69,7 @@ main <- function() {
   #log_threshold(INFO)
   #log_appender(appender_file("../logs/sync.log"))
 
-  #message("Starting cache sync")
+  #log_info("Starting cache sync")
 
   tryCatch({
     # Initialize pool
@@ -82,7 +82,7 @@ main <- function() {
     # Generate and insert sample data if table is empty
     if (dbGetQuery(pool, sprintf("SELECT COUNT(*) as count FROM %s",
                                  CACHE_CONFIG$data_table))$count == 0) {
-      message("Generating sample data")
+      log_info("Generating sample data")
       sample_data <- generate_sample_data()
       dbWriteTable(pool, CACHE_CONFIG$data_table, sample_data,
                    append = TRUE, row.names = FALSE)
@@ -94,7 +94,7 @@ main <- function() {
 
     # Sync metadata for each column
     for (col in columns$name) {
-      message("col:", col)
+      log_info("col:", col)
       # Skip date column
       if (col == "date") next
 
@@ -112,7 +112,7 @@ main <- function() {
       sync_column_metadata(pool, col, col_type)
     }
 
-    message("Cache sync completed successfully")
+    log_info("Cache sync completed successfully")
   }, error = function(e) {
     log_error("Error during cache sync: {str(e)}")
     stop(e)

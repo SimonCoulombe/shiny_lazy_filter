@@ -19,7 +19,7 @@ filterModuleUI <- function(id) {
 }
 
 filterModule <- function(input, output, session) {
-  message("Initializing filter module")
+  log_info("Initializing filter module")
   filter_state <- reactiveVal(NULL)
 
   output$filter_ui <- renderUI({

@@ -51,19 +51,19 @@ plotModule <- function(input, output, session, filters) {
 
   # Update query state when refresh is clicked
   observeEvent(input$refresh, {
-    message("Refresh button clicked")
+    log_info("Refresh button clicked")
     is_loading(TRUE)
 
     # Build the query based on the filters
     query <- build_query(filters())
-    message("Query:", query)
+    log_info("Query:", query)
 
     # Update the query state
     query_state(query)
 
     # Simulate data fetching (replace with actual data fetching logic)
     data <- tryCatch({
-      message("Fetching data with query:", query)
+      log_info("Fetching data with query:", query)
       # Replace this with your actual data fetching logic
       # Example: dbGetQuery(pool, query)
       data.frame(

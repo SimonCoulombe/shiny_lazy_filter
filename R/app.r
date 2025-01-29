@@ -13,8 +13,11 @@ source(here:::here("R/filter_module.R"))
 source(here:::here("R/plot_module.R"))
 
 # Initialize logging
-#log_threshold(INFO)
-#log_appender(appender_file("logs/app.log"))
+log_threshold(INFO)
+
+t <- tempfile()
+log_appender(appender_tee(t))
+#log_appender(appender_file(here::here("logs/app.log")))
 
 # UI
 ui <- fluidPage(
@@ -49,7 +52,7 @@ ui <- fluidPage(
 # Server
 server <- function(input, output, session) {
 
-#  message("Initializing app...")
+#  log_info("Initializing app...")
   initialize_pool()
   # Initialize connection pool on startup
   #onStart(function() {
@@ -57,7 +60,7 @@ server <- function(input, output, session) {
 
   # Clean up on app exit
   onStop(function() {
- #   message("Shutting down app...")
+ #   log_info("Shutting down app...")
     if (!is.null(pool)) poolClose(pool)
   })
 
@@ -66,7 +69,7 @@ server <- function(input, output, session) {
   filters <- reactiveVal(list())
 
   observeEvent(input$add_filter, {
-    message("Adding new filter")
+    log_info("Adding new filter")
     current_count <- filter_count()
     filter_count(current_count + 1)
 

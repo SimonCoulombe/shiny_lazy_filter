@@ -7,7 +7,7 @@ library(logger)
 pool <- NULL
 
 initialize_pool <- function() {
-  message("Initializing connection pool")
+  log_info("Initializing connection pool")
   pool <<- dbPool(
     RSQLite::SQLite(),
     dbname = "cache.db",
@@ -57,7 +57,7 @@ build_query <- function(filters) {
     }
   }
 
-  message("Generated query: {query}")
+  log_info("Generated query: {query}")
   query
 }
 
