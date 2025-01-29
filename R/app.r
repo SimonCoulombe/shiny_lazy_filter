@@ -1,4 +1,3 @@
-# ===== myapp/R/app.R =====
 library(shiny)
 library(pool)
 library(dplyr)
@@ -64,10 +63,7 @@ server <- function(input, output, session) {
     filter_count(current_count + 1)
 
     filters_list <- filters()
-    filters_list[[length(filters_list) + 1]] <- callModule(
-      filterModule,
-      paste0("filter_", current_count)
-    )
+    filters_list[[length(filters_list) + 1]] <- filterModule(paste0("filter_", current_count))
     filters(filters_list)
   })
 
@@ -78,10 +74,8 @@ server <- function(input, output, session) {
   })
 
   # Initialize plot module
-  callModule(plotModule, "plot", filters = filters)
+  plotModule("plot", filters = filters)
 }
 
 # Run the app
-
 shinyApp(ui = ui, server = server)
-
