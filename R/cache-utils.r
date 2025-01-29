@@ -1,126 +1,3 @@
-library(DBI)
-library(pool)
-library(RSQLite)
-library(logger)
-library(jsonlite)
-library(lubridate)
-
-# Cache configuration
-CACHE_CONFIG <- list(
-  cache_table = "column_metadata",
-  data_table = "timeseries",
-  max_cache_age_hours = 24
-)
-
-#' Create sample timeseries data
-#' @param n Number of rows to generate
-#' @return Data frame with sample timeseries data
-create_sample_data <- function(n = 1000) {
-  # Create date sequence for past 2 years
-  dates <- seq(
-    from = Sys.Date() - years(2),
-    to = Sys.Date(),
-    length.out = n
-  )
-
-  # Create multiple metrics with different patterns
-  set.seed(123)  # For reproducibility
-
-  data.frame(
-    date = dates,
-    # Main value with trend and seasonality
-    value = sin(1:n / 50) * 100 + # Seasonal component
-      0.1 * 1:n +            # Upward trend
-      rnorm(n, sd = 10),     # Random noise
-
-    # Additional metrics
-    daily_users = rpois(n, lambda = 100) + 50 * sin(1:n / 30),
-    revenue = rlnorm(n, meanlog = 4, sdlog = 0.3) * (1 + sin(1:n / 60)),
-
-    # Categorical variables
-    category = sample(
-      c("Product A", "Product B", "Product C", "Product D"),
-      n, replace = TRUE,
-      prob = c(0.4, 0.3, 0.2, 0.1)
-    ),
-    region = sample(
-      c("North America", "Europe", "Asia", "South America"),
-      n, replace = TRUE
-    ),
-    status = sample(
-      c("Active", "Inactive", "Pending"),
-      n, replace = TRUE,
-      prob = c(0.7, 0.2, 0.1)
-    )
-  )
-}
-
-#' Initialize the database with sample data
-#' @param pool Database connection pool
-initialize_sample_database <- function(pool) {
-  message("Initializing sample database")
-
-  tryCatch({
-    # Drop existing tables if they exist
-    dbExecute(pool, sprintf("DROP TABLE IF EXISTS %s", CACHE_CONFIG$data_table))
-    dbExecute(pool, sprintf("DROP TABLE IF EXISTS %s", CACHE_CONFIG$cache_table))
-
-    # Create timeseries table
-    dbExecute(pool, "
-      CREATE TABLE timeseries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date DATE NOT NULL,
-        value NUMERIC,
-        daily_users INTEGER,
-        revenue NUMERIC,
-        category VARCHAR(50),
-        region VARCHAR(50),
-        status VARCHAR(20)
-      )
-    ")
-
-    # Create indexes for better query performance
-    dbExecute(pool, "CREATE INDEX idx_timeseries_date ON timeseries(date)")
-    dbExecute(pool, "CREATE INDEX idx_timeseries_category ON timeseries(category)")
-    dbExecute(pool, "CREATE INDEX idx_timeseries_region ON timeseries(region)")
-
-    # Create column metadata cache table
-    dbExecute(pool, "
-      CREATE TABLE column_metadata (
-        column_name VARCHAR(255) PRIMARY KEY,
-        column_type VARCHAR(50),
-        distinct_values TEXT,
-        min_value NUMERIC,
-        max_value NUMERIC,
-        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    ")
-
-    # Generate and insert sample data
-    message("Generating sample data")
-    sample_data <- create_sample_data(1000)
-
-    # Insert data in chunks to avoid memory issues
-    chunk_size <- 100
-    n_chunks <- ceiling(nrow(sample_data) / chunk_size)
-
-    for(i in 1:n_chunks) {
-      start_idx <- ((i-1) * chunk_size) + 1
-      end_idx <- min(i * chunk_size, nrow(sample_data))
-      chunk <- sample_data[start_idx:end_idx, ]
-
-      dbWriteTable(pool, CACHE_CONFIG$data_table, chunk,
-                   append = TRUE, row.names = FALSE)
-    }
-
-    message("Sample database initialized successfully")
-  }, error = function(e) {
-    log_error("Error initializing sample database: {str(e)}")
-    stop(e)
-  })
-}
-
-# [Rest of the existing cache_utils.R code remains the same...]
 
 library(DBI)
 library(pool)
@@ -327,4 +204,127 @@ get_range <- function(column_name) {
   ))
 
   return(c(result$min_val, result$max_val))
+}
+
+
+library(DBI)
+library(pool)
+library(RSQLite)
+library(logger)
+library(jsonlite)
+library(lubridate)
+
+# Cache configuration
+CACHE_CONFIG <- list(
+  cache_table = "column_metadata",
+  data_table = "timeseries",
+  max_cache_age_hours = 24
+)
+
+#' Create sample timeseries data
+#' @param n Number of rows to generate
+#' @return Data frame with sample timeseries data
+create_sample_data <- function(n = 1000) {
+  # Create date sequence for past 2 years
+  dates <- seq(
+    from = Sys.Date() - years(2),
+    to = Sys.Date(),
+    length.out = n
+  )
+
+  # Create multiple metrics with different patterns
+  set.seed(123)  # For reproducibility
+
+  data.frame(
+    date = dates,
+    # Main value with trend and seasonality
+    value = sin(1:n / 50) * 100 + # Seasonal component
+      0.1 * 1:n +            # Upward trend
+      rnorm(n, sd = 10),     # Random noise
+
+    # Additional metrics
+    daily_users = rpois(n, lambda = 100) + 50 * sin(1:n / 30),
+    revenue = rlnorm(n, meanlog = 4, sdlog = 0.3) * (1 + sin(1:n / 60)),
+
+    # Categorical variables
+    category = sample(
+      c("Product A", "Product B", "Product C", "Product D"),
+      n, replace = TRUE,
+      prob = c(0.4, 0.3, 0.2, 0.1)
+    ),
+    region = sample(
+      c("North America", "Europe", "Asia", "South America"),
+      n, replace = TRUE
+    ),
+    status = sample(
+      c("Active", "Inactive", "Pending"),
+      n, replace = TRUE,
+      prob = c(0.7, 0.2, 0.1)
+    )
+  )
+}
+
+#' Initialize the database with sample data
+#' @param pool Database connection pool
+initialize_sample_database <- function(pool) {
+  message("Initializing sample database")
+
+  tryCatch({
+    # Drop existing tables if they exist
+    dbExecute(pool, sprintf("DROP TABLE IF EXISTS %s", CACHE_CONFIG$data_table))
+    dbExecute(pool, sprintf("DROP TABLE IF EXISTS %s", CACHE_CONFIG$cache_table))
+
+    # Create timeseries table
+    dbExecute(pool, "
+      CREATE TABLE timeseries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date DATE NOT NULL,
+        value NUMERIC,
+        daily_users INTEGER,
+        revenue NUMERIC,
+        category VARCHAR(50),
+        region VARCHAR(50),
+        status VARCHAR(20)
+      )
+    ")
+
+    # Create indexes for better query performance
+    dbExecute(pool, "CREATE INDEX idx_timeseries_date ON timeseries(date)")
+    dbExecute(pool, "CREATE INDEX idx_timeseries_category ON timeseries(category)")
+    dbExecute(pool, "CREATE INDEX idx_timeseries_region ON timeseries(region)")
+
+    # Create column metadata cache table
+    dbExecute(pool, "
+      CREATE TABLE column_metadata (
+        column_name VARCHAR(255) PRIMARY KEY,
+        column_type VARCHAR(50),
+        distinct_values TEXT,
+        min_value NUMERIC,
+        max_value NUMERIC,
+        last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    ")
+
+    # Generate and insert sample data
+    message("Generating sample data")
+    sample_data <- create_sample_data(1000)
+
+    # Insert data in chunks to avoid memory issues
+    chunk_size <- 100
+    n_chunks <- ceiling(nrow(sample_data) / chunk_size)
+
+    for(i in 1:n_chunks) {
+      start_idx <- ((i-1) * chunk_size) + 1
+      end_idx <- min(i * chunk_size, nrow(sample_data))
+      chunk <- sample_data[start_idx:end_idx, ]
+
+      dbWriteTable(pool, CACHE_CONFIG$data_table, chunk,
+                   append = TRUE, row.names = FALSE)
+    }
+
+    message("Sample database initialized successfully")
+  }, error = function(e) {
+    log_error("Error initializing sample database: {str(e)}")
+    stop(e)
+  })
 }

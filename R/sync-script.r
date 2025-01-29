@@ -10,7 +10,7 @@ library(jsonlite)
 library(lubridate)
 
 # Source cache utilities
-#source("../R/cache_utils.R")
+source(here:::here("R/cache-utils.R"))
 
 #' Generate sample time series data
 #' @param n Number of rows to generate
