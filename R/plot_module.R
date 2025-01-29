@@ -24,6 +24,7 @@ plotModuleUI <- function(id) {
 }
 plotModule <- function(input, output, session, filters) {
   ns <- session$ns
+  pool <- get_pool()
 
   # Reactive values
   query_state <- reactiveVal(NULL)
@@ -66,10 +67,7 @@ plotModule <- function(input, output, session, filters) {
       log_info("Fetching data with query:", query)
       # Replace this with your actual data fetching logic
       # Example: dbGetQuery(pool, query)
-      data.frame(
-        date = seq.Date(Sys.Date() - 29, Sys.Date(), by = "day"),
-        value = rnorm(30, mean = 50, sd = 10)
-      )
+      dbGetQuery(pool, query)
     }, error = function(e) {
       showNotification(
         "Error fetching data. Please try again.",
